@@ -1,9 +1,12 @@
-// 🚀 X/Twitter Ultra Analytics v5.0 (Flawless Timeline & Phase Fix)
-// Profil sayfanızda (F12 > Console) çalıştırın.
+// 🚀 X/Twitter Ultra Analytics v6.0 (Pure Analytics & RT Fix)
+// Kendi profilinizde çalıştırın. Sadece SİZE AİT tweetlerin verisini hesaplar.
 (async () => {
     if (window._xUltraPremium) clearInterval(window._xUltraPremium);
     const existingUI = document.getElementById('x-premium-dashboard');
     if (existingUI) existingUI.remove();
+
+    // 1. Profil Sahibinin Kullanıcı Adını Yakala
+    const profileUsername = location.pathname.split('/').filter(Boolean)[0].toLowerCase();
 
     const now = new Date();
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -24,27 +27,27 @@
         panel.innerHTML = `
             <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02);">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <div id="p-pulse" style="width: 8px; height: 8px; background: #1d9bf0; border-radius: 50%; box-shadow: 0 0 10px #1d9bf0; animation: pulse 1.5s infinite;"></div>
-                    <span style="font-weight: 700; font-size: 16px; letter-spacing: -0.5px;">14 Günlük Performans</span>
+                    <div id="p-pulse" style="width: 8px; height: 8px; background: #7856ff; border-radius: 50%; box-shadow: 0 0 10px #7856ff; animation: pulse 1.5s infinite;"></div>
+                    <span style="font-weight: 700; font-size: 16px; letter-spacing: -0.5px;">Saf Analiz (Sadece Siz)</span>
                 </div>
-                <span id="p-status" style="color: #1d9bf0; font-size: 12px; font-weight: 600; padding: 4px 10px; background: rgba(29,155,240,0.1); border-radius: 12px;">Aktif Tarama...</span>
+                <span id="p-status" style="color: #7856ff; font-size: 12px; font-weight: 600; padding: 4px 10px; background: rgba(120,86,255,0.15); border-radius: 12px;">Tarama Aktif...</span>
             </div>
 
             <div style="padding: 16px 24px 0 24px;">
                 <div style="display: flex; justify-content: space-between; font-size: 12px; color: #8b98a5; margin-bottom: 8px;">
-                    <span>Taranan Tweet: <b id="p-tweet-count" style="color:#fff">0</b></span>
+                    <span>Size Ait Tweet: <b id="p-tweet-count" style="color:#fff">0</b></span>
                     <span id="p-date-tracker">Zaman: <b>Bugün</b></span>
                 </div>
                 <div style="text-align: center; font-size: 11px; padding: 4px; border-radius: 6px; background: rgba(255,255,255,0.05); color: #fff; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.03);" id="p-phase-indicator">
                     🟢 Zaman Tüneli: <b>Son 7 Gün (1. Hafta) okunuyor...</b>
                 </div>
                 <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
-                    <div id="p-progress-bar" style="height: 100%; width: 5%; background: linear-gradient(90deg, #1d9bf0, #f91880, #00ba7c); transition: width 0.5s ease;"></div>
+                    <div id="p-progress-bar" style="height: 100%; width: 5%; background: linear-gradient(90deg, #1d9bf0, #7856ff, #00ba7c); transition: width 0.5s ease;"></div>
                 </div>
             </div>
             
             <div id="p-charts" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; max-height: 55vh; overflow-y: auto;">
-                <div style="text-align: center; color: #536471; font-size: 14px; padding: 20px 0;">Veriler toplanıyor...</div>
+                <div style="text-align: center; color: #536471; font-size: 14px; padding: 20px 0;">Profiliniz analiz ediliyor...</div>
             </div>
         `;
 
@@ -107,7 +110,7 @@
                     phaseEl.innerHTML = '🟢 Zaman Tüneli: <b>Son 7 Gün (1. Hafta) okunuyor...</b>';
                     phaseEl.style.color = '#00ba7c';
                 } else if (phase === 2) {
-                    phaseEl.innerHTML = '🟡 Zaman Tüneli: <b>Önceki 7 Gün (2. Hafta) okunuyor...</b> <br> <span style="font-size:9px; color:#8b98a5;">(1. Hafta bittiği için sadece 2. hafta sayacı artar)</span>';
+                    phaseEl.innerHTML = '🟡 Zaman Tüneli: <b>Önceki 7 Gün (2. Hafta) okunuyor...</b>';
                     phaseEl.style.color = '#ffd400';
                 }
 
@@ -134,7 +137,7 @@
                 document.getElementById('p-pulse').style.boxShadow = '0 0 10px #00ba7c';
                 document.getElementById('p-progress-bar').style.width = '100%';
                 document.getElementById('p-progress-bar').style.background = '#00ba7c';
-                document.getElementById('p-phase-indicator').innerHTML = '✅ <b>14 Günlük zaman tüneli taraması bitti.</b>';
+                document.getElementById('p-phase-indicator').innerHTML = '✅ <b>Saf analiz başarıyla tamamlandı.</b>';
                 document.getElementById('p-phase-indicator').style.color = '#fff';
             }
         };
@@ -154,37 +157,34 @@
     window._xUltraPremium = setInterval(() => {
         const tweets = document.querySelectorAll('article[data-testid="tweet"]');
         let newTweetsFoundInThisCycle = false;
-        
         let foundPhase1InCycle = false;
         let foundPhase2InCycle = false;
 
         tweets.forEach(tweet => {
             const linkEl = tweet.querySelector('a[href*="/status/"]');
             if (!linkEl) return;
-            const tweetId = linkEl.href.split('/status/')[1].split('/')[0];
+            
+            // 2. TWEET KİME AİT KONTROLÜ (EN ÖNEMLİ KISIM)
+            const href = linkEl.getAttribute('href');
+            const tweetAuthor = href.split('/')[1].toLowerCase();
+            const tweetId = href.split('/status/')[1].split('/')[0];
             
             if (processedIds.has(tweetId)) return;
             
+            // Eğer tweeti atan kişi sen değilsen (RT ise), hiçbir işleme sokmadan direkt geç!
+            if (profileUsername !== tweetAuthor) return;
+
             const timeEl = tweet.querySelector('time');
             if (!timeEl) return; 
             
             const tweetDate = new Date(timeEl.getAttribute('datetime'));
-            
-            // DOM tabanlı kesin RT ve Sabitlenmiş Tweet tespiti
-            const hasSocialContext = tweet.querySelector('[data-testid="socialContext"]') !== null;
-            const isPinnedOrRT = hasSocialContext || 
-                                 tweet.innerText.toLowerCase().includes('sabitlenmiş') || 
-                                 tweet.innerText.toLowerCase().includes('pinned') || 
-                                 tweet.innerText.toLowerCase().includes('yeniden gönder') || 
-                                 tweet.innerText.toLowerCase().includes('reposted');
+            const isPinned = tweet.innerText.toLowerCase().includes('sabitlenmiş') || tweet.innerText.toLowerCase().includes('pinned');
 
-            // Sadece orijinal tweetler zaman çizelgesini (Tarih ve Faz) değiştirebilir
-            if (!isPinnedOrRT) {
+            if (!isPinned) {
                 if (tweetDate < oldestDateFound) {
                     oldestDateFound = tweetDate;
                 }
                 
-                // O an ekranda gördüğümüz tweetlere göre dinamik faz kontrolü
                 if (tweetDate >= sevenDaysAgo) foundPhase1InCycle = true;
                 else if (tweetDate >= fourteenDaysAgo) foundPhase2InCycle = true;
                 
@@ -195,7 +195,7 @@
                 }
             }
 
-            // İstatistikleri (RT ve Sabitlenmiş dahil) hangi haftaya ekleyeceğiz?
+            // Tweeti istatistiğe ekleme kararı
             let targetWeek = null;
             if (tweetDate >= sevenDaysAgo) targetWeek = stats.w1;
             else if (tweetDate >= fourteenDaysAgo) targetWeek = stats.w2;
@@ -218,12 +218,12 @@
             }
         });
 
-        // Dinamik faz ataması: Eğer ekranda 1. haftaya ait tweet varsa kesinlikle 1. haftadayız demektir.
         if (foundPhase1InCycle) currentPhase = 1;
         else if (foundPhase2InCycle) currentPhase = 2;
 
         ui.updateData(stats, processedIds.size, oldestDateFound, currentPhase);
 
+        // 14 Günden eski kendi tweetlerini arka arkaya görürse bitir
         if (consecutiveOldTweets >= 5) {
             clearInterval(window._xUltraPremium);
             ui.finish();
