@@ -1,159 +1,248 @@
-// 🚀 X/Twitter Profil Analiz (Son 7 Gün) v1.0 (Glassmorphism UI Edition)
-// Kendi profil sayfanızda (örn: x.com/kullaniciadi) F12 > Console'a yapıştırın
+// 🚀 X/Twitter Ultra Analytics v5.0 (Flawless Timeline & Phase Fix)
+// Profil sayfanızda (F12 > Console) çalıştırın.
 (async () => {
-    // Önceki çalışan script ve UI varsa temizle
-    if (window._xStatsCollector) clearInterval(window._xStatsCollector);
-    const existingUI = document.getElementById('x-vibe-analytics');
+    if (window._xUltraPremium) clearInterval(window._xUltraPremium);
+    const existingUI = document.getElementById('x-premium-dashboard');
     if (existingUI) existingUI.remove();
 
-    // 7 Gün öncesinin zaman damgasını hesapla
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    
-    // UI Oluşturucu (Glassmorphism Panel)
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
     const createUI = () => {
         const panel = document.createElement('div');
-        panel.id = 'x-vibe-analytics';
+        panel.id = 'x-premium-dashboard';
         panel.style.cssText = `
-            position: fixed; bottom: 20px; right: 20px; width: 340px;
-            background: rgba(15, 20, 25, 0.75); backdrop-filter: blur(12px);
+            position: fixed; bottom: 24px; right: 24px; width: 440px;
+            background: rgba(9, 9, 11, 0.95); backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;
-            color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            padding: 20px; z-index: 999999; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
+            color: #ededed; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 0; z-index: 999999; box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+            overflow: hidden; display: flex; flex-direction: column;
         `;
-        panel.innerHTML = `
-            <div style="font-weight: 600; font-size: 16px; margin-bottom: 12px; display: flex; justify-content: space-between;">
-                <span>📊 7 Günlük Analiz</span>
-                <span id="x-status" style="color: #1d9bf0; font-size: 14px;">Taranıyor...</span>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-                    <div style="font-size: 11px; color: #8b98a5;">Görüntülenme</div>
-                    <div id="x-views" style="font-size: 18px; font-weight: 700; color: #1d9bf0;">0</div>
-                </div>
-                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-                    <div style="font-size: 11px; color: #8b98a5;">Beğeni</div>
-                    <div id="x-likes" style="font-size: 18px; font-weight: 700; color: #f91880;">0</div>
-                </div>
-                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-                    <div style="font-size: 11px; color: #8b98a5;">Yanıt</div>
-                    <div id="x-replies" style="font-size: 18px; font-weight: 700; color: #00ba7c;">0</div>
-                </div>
-                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-                    <div style="font-size: 11px; color: #8b98a5;">İncelenen Tweet</div>
-                    <div id="x-tweets" style="font-size: 18px; font-weight: 700; color: #ffd400;">0</div>
-                </div>
-            </div>
-            <div id="x-log" style="font-size: 12px; color: #8b98a5; max-height: 60px; overflow-y: auto; margin-bottom: 10px;"></div>
-        `;
-        document.body.appendChild(panel);
         
+        panel.innerHTML = `
+            <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div id="p-pulse" style="width: 8px; height: 8px; background: #1d9bf0; border-radius: 50%; box-shadow: 0 0 10px #1d9bf0; animation: pulse 1.5s infinite;"></div>
+                    <span style="font-weight: 700; font-size: 16px; letter-spacing: -0.5px;">14 Günlük Performans</span>
+                </div>
+                <span id="p-status" style="color: #1d9bf0; font-size: 12px; font-weight: 600; padding: 4px 10px; background: rgba(29,155,240,0.1); border-radius: 12px;">Aktif Tarama...</span>
+            </div>
+
+            <div style="padding: 16px 24px 0 24px;">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #8b98a5; margin-bottom: 8px;">
+                    <span>Taranan Tweet: <b id="p-tweet-count" style="color:#fff">0</b></span>
+                    <span id="p-date-tracker">Zaman: <b>Bugün</b></span>
+                </div>
+                <div style="text-align: center; font-size: 11px; padding: 4px; border-radius: 6px; background: rgba(255,255,255,0.05); color: #fff; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.03);" id="p-phase-indicator">
+                    🟢 Zaman Tüneli: <b>Son 7 Gün (1. Hafta) okunuyor...</b>
+                </div>
+                <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                    <div id="p-progress-bar" style="height: 100%; width: 5%; background: linear-gradient(90deg, #1d9bf0, #f91880, #00ba7c); transition: width 0.5s ease;"></div>
+                </div>
+            </div>
+            
+            <div id="p-charts" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; max-height: 55vh; overflow-y: auto;">
+                <div style="text-align: center; color: #536471; font-size: 14px; padding: 20px 0;">Veriler toplanıyor...</div>
+            </div>
+        `;
+
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }`;
+        document.head.appendChild(style);
+        document.body.appendChild(panel);
+
+        const renderChart = (title, w1, w2, colorHex) => {
+            const total = w1 + w2;
+            const diff = w2 === 0 ? (w1 > 0 ? 100 : 0) : ((w1 - w2) / w2 * 100);
+            const isUp = diff >= 0;
+            const diffFormatted = Math.abs(diff).toFixed(1);
+            
+            const maxVal = Math.max(w1, w2, 1);
+            const curWidth = Math.max((w1 / maxVal * 100), 2) + "%";
+            const preWidth = Math.max((w2 / maxVal * 100), 2) + "%";
+
+            return `
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 16px; border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; margin-bottom: 12px;">
+                        <div>
+                            <div style="font-size: 12px; color: #8b98a5; margin-bottom: 2px;">${title} (14 Gün Toplam)</div>
+                            <div style="font-size: 22px; font-weight: 800; color: ${colorHex}; letter-spacing: -0.5px;">${total.toLocaleString('tr-TR')}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 13px; font-weight: 700; color: ${isUp ? '#00ba7c' : '#f4212e'}; background: ${isUp ? 'rgba(0,186,124,0.1)' : 'rgba(244,33,46,0.1)'}; padding: 4px 10px; border-radius: 8px;">
+                                ${isUp ? '▲' : '▼'} %${diffFormatted}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
+                        <div>
+                            <div style="font-size: 11px; color: #8b98a5;">Son 7 Gün (1. Hafta)</div>
+                            <div style="font-size: 14px; font-weight: 600; color: #fff;">${w1.toLocaleString('tr-TR')}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; color: #536471;">Önceki 7 Gün (2. Hafta)</div>
+                            <div style="font-size: 14px; font-weight: 600; color: #8b98a5;">${w2.toLocaleString('tr-TR')}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;">
+                            <div style="width: ${curWidth}; height: 100%; background: ${colorHex}; border-radius: 4px; transition: width 0.5s ease;"></div>
+                        </div>
+                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.03); border-radius: 3px; overflow: hidden;">
+                            <div style="width: ${preWidth}; height: 100%; background: #536471; border-radius: 3px; transition: width 0.5s ease;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
         return {
-            updateStats: (views, likes, replies, tweets) => {
-                document.getElementById('x-views').innerText = views.toLocaleString('tr-TR');
-                document.getElementById('x-likes').innerText = likes.toLocaleString('tr-TR');
-                document.getElementById('x-replies').innerText = replies.toLocaleString('tr-TR');
-                document.getElementById('x-tweets').innerText = tweets;
+            updateData: (stats, count, oldestDate, phase) => {
+                document.getElementById('p-tweet-count').innerText = count;
+                
+                const phaseEl = document.getElementById('p-phase-indicator');
+                if (phase === 1) {
+                    phaseEl.innerHTML = '🟢 Zaman Tüneli: <b>Son 7 Gün (1. Hafta) okunuyor...</b>';
+                    phaseEl.style.color = '#00ba7c';
+                } else if (phase === 2) {
+                    phaseEl.innerHTML = '🟡 Zaman Tüneli: <b>Önceki 7 Gün (2. Hafta) okunuyor...</b> <br> <span style="font-size:9px; color:#8b98a5;">(1. Hafta bittiği için sadece 2. hafta sayacı artar)</span>';
+                    phaseEl.style.color = '#ffd400';
+                }
+
+                if (oldestDate) {
+                    const daysDiff = (now - oldestDate) / (1000 * 60 * 60 * 24);
+                    const progressPercent = Math.min((daysDiff / 14) * 100, 100);
+                    document.getElementById('p-progress-bar').style.width = `${progressPercent}%`;
+                    const dateStr = oldestDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+                    document.getElementById('p-date-tracker').innerHTML = `Tarih: <b>${dateStr}</b>`;
+                }
+
+                document.getElementById('p-charts').innerHTML = `
+                    ${renderChart('Görüntülenme', stats.w1.views, stats.w2.views, '#1d9bf0')}
+                    ${renderChart('Beğeni', stats.w1.likes, stats.w2.likes, '#f91880')}
+                    ${renderChart('Yanıt', stats.w1.replies, stats.w2.replies, '#00ba7c')}
+                `;
             },
-            setStatus: (text, color = '#1d9bf0') => {
-                const el = document.getElementById('x-status');
-                el.innerText = text; el.style.color = color;
-            },
-            log: (text) => {
-                const el = document.getElementById('x-log');
-                el.innerHTML = `<div>${text}</div>` + el.innerHTML;
+            finish: () => {
+                const s = document.getElementById('p-status');
+                s.innerText = 'Tamamlandı';
+                s.style.background = 'rgba(0,186,124,0.1)';
+                s.style.color = '#00ba7c';
+                document.getElementById('p-pulse').style.background = '#00ba7c';
+                document.getElementById('p-pulse').style.boxShadow = '0 0 10px #00ba7c';
+                document.getElementById('p-progress-bar').style.width = '100%';
+                document.getElementById('p-progress-bar').style.background = '#00ba7c';
+                document.getElementById('p-phase-indicator').innerHTML = '✅ <b>14 Günlük zaman tüneli taraması bitti.</b>';
+                document.getElementById('p-phase-indicator').style.color = '#fff';
             }
         };
     };
 
-    const isProfilePage = location.pathname.split('/').filter(Boolean).length === 1;
-    if (!isProfilePage) {
-        alert('❌ Lütfen scripti profil sayfanızda çalıştırın.\nÖrn: x.com/kullaniciadi');
-        return;
-    }
-
     const ui = createUI();
     window.scrollTo(0, 0);
-    ui.log('⏳ Sayfa en üste alındı, tarama başlıyor...');
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise(r => setTimeout(r, 1000));
 
-    let totalViews = 0, totalLikes = 0, totalReplies = 0, tweetCount = 0;
+    let stats = { w1: { views: 0, likes: 0, replies: 0 }, w2: { views: 0, likes: 0, replies: 0 } };
     const processedIds = new Set();
-    let oldTweetCount = 0, stable = 0, lastProcessedCount = 0;
+    let consecutiveOldTweets = 0; 
+    let stableScrolls = 0; 
+    let oldestDateFound = now;
+    let currentPhase = 1;
 
-    window._xStatsCollector = setInterval(() => {
+    window._xUltraPremium = setInterval(() => {
         const tweets = document.querySelectorAll('article[data-testid="tweet"]');
+        let newTweetsFoundInThisCycle = false;
         
+        let foundPhase1InCycle = false;
+        let foundPhase2InCycle = false;
+
         tweets.forEach(tweet => {
-            // Tweetin benzersiz ID'sini linkten çıkar
             const linkEl = tweet.querySelector('a[href*="/status/"]');
             if (!linkEl) return;
             const tweetId = linkEl.href.split('/status/')[1].split('/')[0];
             
             if (processedIds.has(tweetId)) return;
-
-            // Zaman damgasını al
+            
             const timeEl = tweet.querySelector('time');
-            if (!timeEl) return;
+            if (!timeEl) return; 
+            
             const tweetDate = new Date(timeEl.getAttribute('datetime'));
+            
+            // DOM tabanlı kesin RT ve Sabitlenmiş Tweet tespiti
+            const hasSocialContext = tweet.querySelector('[data-testid="socialContext"]') !== null;
+            const isPinnedOrRT = hasSocialContext || 
+                                 tweet.innerText.toLowerCase().includes('sabitlenmiş') || 
+                                 tweet.innerText.toLowerCase().includes('pinned') || 
+                                 tweet.innerText.toLowerCase().includes('yeniden gönder') || 
+                                 tweet.innerText.toLowerCase().includes('reposted');
 
-            // Sabitlenmiş tweet kontrolü (eski tarihli olabilir, atlamamak lazım)
-            const isPinned = tweet.innerText.toLowerCase().includes('sabitlenmiş') || tweet.innerText.toLowerCase().includes('pinned');
-
-            // Eğer tweet 7 günden eskiyse ve sabitlenmemişse sayacı artır
-            if (tweetDate < sevenDaysAgo) {
-                if (!isPinned) {
-                    oldTweetCount++;
+            // Sadece orijinal tweetler zaman çizelgesini (Tarih ve Faz) değiştirebilir
+            if (!isPinnedOrRT) {
+                if (tweetDate < oldestDateFound) {
+                    oldestDateFound = tweetDate;
                 }
-                return; // Bu tweeti hesaplamaya katma
+                
+                // O an ekranda gördüğümüz tweetlere göre dinamik faz kontrolü
+                if (tweetDate >= sevenDaysAgo) foundPhase1InCycle = true;
+                else if (tweetDate >= fourteenDaysAgo) foundPhase2InCycle = true;
+                
+                if (tweetDate < fourteenDaysAgo) {
+                    consecutiveOldTweets++;
+                } else {
+                    consecutiveOldTweets = 0; 
+                }
             }
 
-            // Tweet 7 gün içindeyse verileri topla
-            processedIds.add(tweetId);
-            tweetCount++;
+            // İstatistikleri (RT ve Sabitlenmiş dahil) hangi haftaya ekleyeceğiz?
+            let targetWeek = null;
+            if (tweetDate >= sevenDaysAgo) targetWeek = stats.w1;
+            else if (tweetDate >= fourteenDaysAgo) targetWeek = stats.w2;
 
-            // Aria-label gizli etiketinden sayıları hatasız çek (k, m gibi kısaltmalarla uğraşmamak için)
-            const group = tweet.querySelector('[role="group"]');
-            if (group) {
-                const label = group.getAttribute('aria-label') || '';
+            if (targetWeek) {
+                newTweetsFoundInThisCycle = true;
+                processedIds.add(tweetId);
                 
-                // TR ve EN dillerini destekleyen regex fonksiyonu
-                const extractNum = (regex) => {
-                    const match = label.match(regex);
-                    if (match) {
-                        return parseInt(match[1].replace(/[,.]/g, ''), 10) || 0;
-                    }
-                    return 0;
-                };
-
-                totalViews += extractNum(/([\d.,]+)\s*(görüntülenme|views)/i);
-                totalLikes += extractNum(/([\d.,]+)\s*(beğeni|beğenme|likes)/i);
-                totalReplies += extractNum(/([\d.,]+)\s*(yanıt|replies)/i);
+                const group = tweet.querySelector('[role="group"]');
+                if (group) {
+                    const label = group.getAttribute('aria-label') || '';
+                    const extract = (reg) => {
+                        const m = label.match(reg);
+                        return m ? parseInt(m[1].replace(/[,.]/g, ''), 10) || 0 : 0;
+                    };
+                    targetWeek.views += extract(/([\d.,]+)\s*(görüntülenme|views)/i);
+                    targetWeek.likes += extract(/([\d.,]+)\s*(beğeni|beğenme|likes)/i);
+                    targetWeek.replies += extract(/([\d.,]+)\s*(yanıt|replies)/i);
+                }
             }
         });
 
-        ui.updateStats(totalViews, totalLikes, totalReplies, tweetCount);
+        // Dinamik faz ataması: Eğer ekranda 1. haftaya ait tweet varsa kesinlikle 1. haftadayız demektir.
+        if (foundPhase1InCycle) currentPhase = 1;
+        else if (foundPhase2InCycle) currentPhase = 2;
 
-        // Durdurma Koşulları:
-        // 1. Üst üste 7 günden eski 4 tweet gördüysek sınır aşıldı demektir.
-        // 2. DOM değişmiyorsa (sayfa sonuna geldiysek) bitir.
-        if (processedIds.size === lastProcessedCount) {
-            stable++;
-        } else {
-            stable = 0;
-            lastProcessedCount = processedIds.size;
+        ui.updateData(stats, processedIds.size, oldestDateFound, currentPhase);
+
+        if (consecutiveOldTweets >= 5) {
+            clearInterval(window._xUltraPremium);
+            ui.finish();
+            return;
         }
 
-        if (oldTweetCount >= 4 || stable >= 6) {
-            clearInterval(window._xStatsCollector);
-            ui.setStatus('Tamamlandı!', '#00ba7c');
-            ui.log(`✅ Son 7 günün analizi başarıyla tamamlandı.`);
-            if (stable >= 6 && oldTweetCount < 4) {
-                ui.log(`ℹ️ Sayfa sonuna ulaşıldı.`);
-            }
+        if (!newTweetsFoundInThisCycle) {
+            stableScrolls++;
         } else {
-            // Aşağı kaydır
-            window.scrollBy(0, window.innerHeight * 1.5);
+            stableScrolls = 0; 
         }
-    }, 1200);
+
+        if (stableScrolls >= 15) {
+            clearInterval(window._xUltraPremium);
+            ui.finish();
+            return;
+        }
+
+        window.scrollBy(0, window.innerHeight * 0.85);
+
+    }, 1500); 
 })();
